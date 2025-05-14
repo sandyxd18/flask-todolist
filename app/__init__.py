@@ -5,7 +5,6 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from werkzeug.security import generate_password_hash
 
-from .models import User
 from .config import Config
 
 db = SQLAlchemy()
@@ -31,6 +30,7 @@ def create_app():
     return app
 
 def create_admin_user():
+    from .models import User
     admin_password = os.getenv("DEFAULT_ADMIN_PASSWORD")
     if not admin_password:
         raise ValueError("DEFAULT_ADMIN_PASSWORD is not set in environment variables.")
@@ -44,4 +44,4 @@ def create_admin_user():
         db.session.add(admin_user)
         db.session.commit()
 
-__all__ = ['create_app', 'create_admin_user']
+__all__ = ['create_app', 'db', 'create_admin_user']
