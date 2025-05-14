@@ -44,4 +44,4 @@ def create_admin_user():
         db.session.add(admin_user)
         db.session.commit()
 
-__all__ = ['create_app', 'db', 'create_admin_user']
+__all__ = ['create_app', 'create_admin_user']
