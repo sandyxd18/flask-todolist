@@ -3,7 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
-from werkzeug.security import generate_password_hash
+#from werkzeug.security import generate_password_hash
 
 from .config import Config
 
@@ -36,9 +36,10 @@ def create_admin_user():
         raise ValueError("DEFAULT_ADMIN_PASSWORD is not set in environment variables.")
 
     if not User.query.filter_by(username='admin').first():
+        hashed_pw = bcrypt.generate_password_hash(admin_password).decode('utf-8')
         admin_user = User(
             username='admin',
-            password=generate_password_hash(admin_password),  # Ganti sesuai keinginan
+            password=hashed_pw,  # Ganti sesuai keinginan
             role='admin'
         )
         db.session.add(admin_user)
