@@ -39,7 +39,7 @@ def create_admin_user():
         admin_user = User(
             username='admin',
             password=generate_password_hash(admin_password),  # Ganti sesuai keinginan
-            is_admin=True
+            role='admin'
         )
         db.session.add(admin_user)
         db.session.commit()

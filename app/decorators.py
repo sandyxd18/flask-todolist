@@ -9,7 +9,7 @@ def admin_required(fn):
     def wrapper(*args, **kwargs):
         current_user = get_jwt_identity()
         user = User.query.filter_by(username=current_user).first()
-        if user.role != 'admin':
+        if not user or user.role != 'admin':
             return jsonify({'msg': 'Admin access required'}), 403
         return fn(*args, **kwargs)
     return wrapper
