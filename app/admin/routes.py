@@ -1,15 +1,9 @@
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, request, jsonify
 from .. import db, bcrypt
 from ..models import User, Task
 from ..decorators import admin_required
 
-# admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 admin_bp = Blueprint('admin', __name__)
-
-# @admin_bp.before_request
-# def restrict_admin_access():
-#     if not request.host.split(':')[0] == 'admin.domain.com':
-#         abort(403, description="Forbidden: Admin routes only accessible via admin domain.")
 
 @admin_bp.route('/users', methods=['GET'])
 @admin_required

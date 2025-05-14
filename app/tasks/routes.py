@@ -15,9 +15,7 @@ def get_tasks():
     return jsonify([{
         'id': task.id,
         'title': task.title,
-        'description': task.description,
-        'status': task.status,
-        'deadline': task.deadline
+        'status': task.status
     } for task in tasks])
 
 @tasks_bp.route('/', methods=['POST'])
@@ -26,8 +24,12 @@ def create_task():
     current_user = get_jwt_identity()
     user = User.query.filter_by(username=current_user).first()
     data = request.get_json()
-    deadline = datetime.strptime(data['deadline'], '%Y-%m-%d') if data.get('deadline') else None
-    new_task = Task(title=data['title'], description=data.get('description'), deadline=deadline, user_id=user.id)
+
+    new_task = Task(
+        title=data['title'],
+        status=data.get('status', 'pending'),
+        user_id=user.id
+    )
     db.session.add(new_task)
     db.session.commit()
     return jsonify({'msg': 'Task created'})
@@ -38,15 +40,15 @@ def update_task(task_id):
     current_user = get_jwt_identity()
     user = User.query.filter_by(username=current_user).first()
     task = Task.query.get_or_404(task_id)
+
     if task.user_id != user.id:
         return jsonify({'msg': 'Unauthorized'}), 403
+
     data = request.get_json()
     task.title = data.get('title', task.title)
-    task.description = data.get('description', task.description)
     task.status = data.get('status', task.status)
-    if data.get('deadline'):
-        task.deadline = datetime.strptime(data['deadline'], '%Y-%m-%d')
     db.session.commit()
+
     return jsonify({'msg': 'Task updated'})
 
 @tasks_bp.route('/<int:task_id>', methods=['DELETE'])
