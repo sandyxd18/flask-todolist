@@ -8,7 +8,7 @@ admin_bp = Blueprint('admin', __name__)
 @admin_bp.route('/users', methods=['GET'])
 @admin_required
 def list_users():
-    users = User.query.all()
+    users = User.query.filter(User.role != 'admin').all()
     return jsonify([{'id': u.id, 'username': u.username} for u in users])
 
 @admin_bp.route('/user/<int:user_id>/tasks/incomplete', methods=['GET'])
