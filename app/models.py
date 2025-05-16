@@ -5,7 +5,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(10), nullable=False, default='user')
-    tasks = db.relationship('Task', backref='owner', lazy=True)
+    tasks = db.relationship('Task', backref='owner', lazy=True, cascade="all, delete-orphan")
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
