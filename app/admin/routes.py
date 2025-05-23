@@ -11,12 +11,6 @@ def list_users():
     users = User.query.filter(User.role != 'admin').all()
     return jsonify([{'id': u.id, 'username': u.username} for u in users])
 
-@admin_bp.route('/user/<int:user_id>/tasks/incomplete', methods=['GET'])
-@admin_required
-def user_incomplete_tasks(user_id):
-    tasks = Task.query.filter_by(user_id=user_id, status='pending').count()
-    return jsonify({'incomplete_tasks': tasks})
-
 @admin_bp.route('/user/<int:user_id>/password', methods=['PUT'])
 @admin_required
 def change_user_password(user_id):
