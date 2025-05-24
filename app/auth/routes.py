@@ -1,43 +1,76 @@
 from flask import Blueprint, request, jsonify
 from .. import db, bcrypt
 from ..models import User
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, decode_token
 from datetime import timedelta
-from flask_jwt_extended import decode_token
 
 auth_bp = Blueprint('auth', __name__)
+
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
+
     hashed_pw = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+
     new_user = User(username=data['username'], password=hashed_pw)
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'msg': 'User registered successfully'})
+
+    access_token = create_access_token(identity=new_user.username, expires_delta=timedelta(days=1))
+
+    new_user = User(
+        id=new_user.id,
+        username=new_user.username,
+        role='user'
+    )
+
+    return jsonify({
+        'msg': 'User registered successfully',
+        'access_token': access_token,
+        'data': {
+            'id': new_user.id,
+            'username': new_user.username,
+            'role': new_user.role
+        }
+    }), 201
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.query.filter_by(username=data['username']).first()
     if user and bcrypt.check_password_hash(user.password, data['password']):
-        access_token = create_access_token(identity=user.username, expires_delta=timedelta(days=1))
-        return jsonify({'access_token': access_token})
+        access_token = create_access_token(
+            identity=user.username,
+            expires_delta=timedelta(days=1)
+        )
+        return jsonify({
+            'msg': 'User logged in successfully',
+            'access_token': access_token,
+            'data': {
+                'id': user.id,
+                'username': user.username,
+                'role': user.role
+            }
+        }), 200
     return jsonify({'msg': 'Invalid credentials'}), 401
+
 
 @auth_bp.route('/reset-password', methods=['POST'])
 def reset_password():
     data = request.get_json()
     username = data.get('username')
     user = User.query.filter_by(username=username).first()
-    
+
     if not user:
         return jsonify({'msg': 'User not found'}), 404
 
     # Buat reset token dengan expiry pendek
     reset_token = create_access_token(identity=user.username, expires_delta=timedelta(minutes=15))
-    
+
     return jsonify({'reset_token': reset_token}), 200
+
 
 @auth_bp.route('/change-password', methods=['POST'])
 def change_password():

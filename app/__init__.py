@@ -1,9 +1,10 @@
 import os
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
-#from werkzeug.security import generate_password_hash
+from flask_cors import CORS
 
 from .config import Config
 
@@ -14,6 +15,7 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -28,6 +30,8 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
     return app
+
+
 
 def create_admin_user():
     from .models import User
