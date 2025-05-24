@@ -12,6 +12,7 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -32,7 +33,6 @@ def create_app():
     return app
 
 
-
 def create_admin_user():
     from .models import User
     admin_password = os.getenv("DEFAULT_ADMIN_PASSWORD")
@@ -48,5 +48,6 @@ def create_admin_user():
         )
         db.session.add(admin_user)
         db.session.commit()
+
 
 __all__ = ['create_app', 'db', 'create_admin_user']
