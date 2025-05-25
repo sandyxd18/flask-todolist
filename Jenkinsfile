@@ -3,7 +3,7 @@ pipeline {
         label 'agent-node1'
     }
     
-    environtment {
+    environment {
         APP_REPO = 'https://github.com/sandyxd18/flask-todolist.git'
         MANIFEST_REPO = 'https://github.com/sandyxd18/manifest-tubes.git'
         DOCKER_IMAGE = 'sandyxd18/backend-tubes'
