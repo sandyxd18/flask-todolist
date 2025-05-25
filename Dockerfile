@@ -6,8 +6,6 @@ COPY /app .
 
 COPY run.py .
 
-COPY .env .
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
