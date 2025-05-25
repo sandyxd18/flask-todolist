@@ -12,7 +12,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = credentials('a77b13b7-6e11-4652-9760-e73ef64c6d32')
         ARGOCD_CREDENTIALS_ID = credentials('argocd-creds')
         ARGOCD_SERVER = '192.168.22.172:31014'
-        APP_NAME = backend
+        APP_NAME = 'backend'
     }
     
     stages {
