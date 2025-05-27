@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from prometheus_flask_exporter import PrometheusMetrics
 
 from .config import Config
 
@@ -16,7 +17,9 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    # CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app)
+    PrometheusMetrics(app)
 
     db.init_app(app)
     bcrypt.init_app(app)
