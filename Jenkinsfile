@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'agent-node1'
+        label 'agent-node2'
     }
 
     environment {
@@ -27,11 +27,12 @@ pipeline {
                 script {
                     def imageTag = "v${env.BUILD_NUMBER}"
                     env.IMAGE_TAG = imageTag
+                    // env.IMAGE_TAG = "v${env.BUILD_NUMBER}"
                     withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
-                            buildah bud -t ${DOCKER_IMAGE}:$IMAGE_TAG .
-                            buildah login -u "$DOCKER_USER" -p "$DOCKER_PASS" docker.io
-                            buildah push ${DOCKER_IMAGE}:$IMAGE_TAG
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_IMAGE}:${imageTag} .
+                            docker push ${DOCKER_IMAGE}:${imageTag}
                         """
                     }
                 }
@@ -41,7 +42,7 @@ pipeline {
         stage('Clone Manifest Repo') {
             steps {
                 dir('manifest') {
-                    git url: "${MANIFEST_REPO}", credentialsId: "${GIT_CREDENTIALS_ID}"
+                    git url: "${MANIFEST_REPO}", branch: 'main'
                 }
             }
         }
@@ -50,14 +51,20 @@ pipeline {
             steps {
                 dir('manifest/backend-manifest') {
                     script {
-                        sh """
-                            sed -i 's|image: ${DOCKER_IMAGE}:.*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|' backend-deployment.yaml
-                            git config user.name "jenkins"
-                            git config user.email "jenkins@example.com"
-                            git add .
-                            git commit -m "Update image tag to ${IMAGE_TAG}" || echo 'No changes to commit'
-                            git push origin main
-                        """
+                        def imageTag = "v${env.BUILD_NUMBER}"
+                        env.IMAGE_TAG = imageTag
+                        withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                            sh """
+                                sed -i 's|image: ${DOCKER_IMAGE}:.*|image: ${DOCKER_IMAGE}:${imageTag}|' backend-deployment.yaml
+                                git config user.name "jenkins"
+                                git config user.email "jenkins@example.com"
+                                git add .
+                                git commit -m "Update image tag to ${imageTag}" || echo 'No changes to commit'
+
+                                # Push dengan kredensial aman via HTTPS
+                                git push https://$GIT_USER:$GIT_TOKEN@github.com/sandyxd18/manifest-tubes.git main
+                            """
+                        }
                     }
                 }
             }
@@ -69,11 +76,17 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: ARGOCD_CREDENTIALS_ID, usernameVariable: 'ARGOCD_USER', passwordVariable: 'ARGOCD_PASS')]) {
                         sh """
                             argocd login ${ARGOCD_SERVER} --username $ARGOCD_USER --password $ARGOCD_PASS --insecure
-                            argocd app sync ${APP_NAME}
+                            argocd app sync ${APP_NAME} --prune
                         """
                     }
                 }
             }
+        }
+    }
+    post {
+        // Clean after build
+        always {
+            cleanWs()
         }
     }
 }
