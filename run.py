@@ -13,4 +13,4 @@ with app.app_context():
     create_admin_user()
 
 if __name__ == '__main__':
-    app.run(debug=True, ssl_context=('cert.pem', 'key.pem'))
+    app.run(debug=True)
