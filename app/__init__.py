@@ -12,15 +12,14 @@ from .config import Config
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
-
+metrics = PrometheusMetrics()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     CORS(app, resources={r"/*": {"origins": "*"}})
     # CORS(app)
-    metrics = PrometheusMetrics(app)
-
+    
     metrics.init_app(app)
     db.init_app(app)
     bcrypt.init_app(app)
