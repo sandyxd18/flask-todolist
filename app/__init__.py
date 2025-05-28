@@ -12,7 +12,7 @@ from .config import Config
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
-metrics = PrometheusMetrics()
+# metrics = PrometheusMetrics()
 
 def create_app():
     app = Flask(__name__)
@@ -32,7 +32,7 @@ def create_app():
     app.register_blueprint(tasks_bp, url_prefix='/tasks')
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
-    metrics.init_app(app)
+    PrometheusMetrics(app, group_by='endpoint')
 
     return app
 
