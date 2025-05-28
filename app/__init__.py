@@ -21,6 +21,7 @@ def create_app():
     # CORS(app)
     metrics = PrometheusMetrics(app)
 
+    metrics.init_app(app)
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
