@@ -19,7 +19,7 @@ def create_app():
     app.config.from_object(Config)
     CORS(app, resources={r"/*": {"origins": "*"}})
     # CORS(app)
-    PrometheusMetrics(app)
+    metrics = PrometheusMetrics(app)
 
     db.init_app(app)
     bcrypt.init_app(app)
