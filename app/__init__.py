@@ -17,8 +17,14 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    CORS(app, resources={r"/*": {"origins": "*"}})
-    # CORS(app)
+   
+    # replace this "https://your-frontend.com" with your actual react domain
+    CORS(app, resources={
+    r"/*": {
+        "origins": ["https://your-frontend.com"],
+        "supports_credentials": True
+    }
+})
     
     db.init_app(app)
     bcrypt.init_app(app)
